@@ -27,8 +27,8 @@ EOF
 # Role policy
 # TODO: Add to data_policy
 resource "aws_iam_role_policy" "kubernetes" {
-  name  = "kubernetes"
-  roles = "${aws_iam_role.kubernetes.id}"
+  name = "kubernetes"
+  role = "${aws_iam_role.kubernetes.id}"
 
   policy = <<EOF
 {

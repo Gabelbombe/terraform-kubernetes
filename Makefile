@@ -100,8 +100,9 @@ terraform: init .directory-MODULE .check-region
                                                                                 \
 	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform apply               \
 		-state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
+		-var default_keypair_public_key="$(SIGNATURE)"                              \
+		-var default_keypair_name=$(ROLE)                                           \
 		-var region=$(REGION)                                                       \
-		-var key_name=$(ROLE)                                                       \
 		-auto-approve                                                               \
 	2>&1 |tee $(LOGS_DIR)/kubernetes-apply.log
 
@@ -109,17 +110,18 @@ terraform: init .directory-MODULE .check-region
 
 provision: .roles
 	export TF_STATE=$(STATE_DIR)/$(ROLE)_terraform.tfstate                      ; \
-	ansible-playbook -v --inventory-file=$(INVENTORY) jenkins.yml                 \
+	ansible-playbook -v --inventory-file=$(INVENTORY) infra.yml                 \
 	2>&1 |tee $(LOGS_DIR)/ansible-provision.log
 
 
 destroy: init .directory-MODULE .check-region
-	@echo -e "\n\n\n\nkubernetes-destroy: $(date +"%Y-%m-%d @ %H:%M:%S")\n"          \
+	@echo -e "\n\n\n\nkubernetes-destroy: $(date +"%Y-%m-%d @ %H:%M:%S")\n"       \
 		>> $(LOGS_DIR)/kubernetes-destroy.log
 	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform destroy             \
 		-state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
-		-var region=$(REGION)		                                                    \
-		-var key_name=$(ROLE)                                                       \
+		-var default_keypair_public_key="$(SIGNATURE)"                              \
+		-var default_keypair_name=$(ROLE)                                           \
+		-var region=$(REGION)                                                       \
 		-auto-approve                                                               \
 	2>&1 |tee $(LOGS_DIR)/kubernetes-destroy.log
 

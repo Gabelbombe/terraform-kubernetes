@@ -1,4 +1,4 @@
-# Kubernetes not the hardest way (or "Provisioning a Kubernetes Cluster on AWS using Terraform and Ansible")
+# Terraform Kubernetes module
 
 A worked example to provision a Kubernetes cluster on AWS from scratch, using Terraform and Ansible.
 - AWS VPC

@@ -96,10 +96,10 @@ terraform: init .directory-MODULE .check-region
 	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform plan                \
 		-var region=$(REGION)                                                       \
 		-var key_name=$(ROLE)                                                       \
-	2>&1 |tee $(LOGS_DIR)/kubernetes-plan.log                                      ; \
+	2>&1 |tee $(LOGS_DIR)/kubernetes-plan.log                                   ; \
                                                                                 \
 	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform apply               \
-		-state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
+		-state=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate                     \
 		-var default_keypair_public_key="$(SIGNATURE)"                              \
 		-var default_keypair_name=$(ROLE)                                           \
 		-var region=$(REGION)                                                       \
@@ -109,8 +109,8 @@ terraform: init .directory-MODULE .check-region
 
 
 provision: .roles
-	export TF_STATE=$(STATE_DIR)/$(ROLE)_terraform.tfstate                      ; \
-	ansible-playbook -v --inventory-file=$(INVENTORY) infra.yml                 \
+	export TF_STATE=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate            ; \
+	ansible-playbook -v --inventory-file=$(INVENTORY) infra.yml                   \
 	2>&1 |tee $(LOGS_DIR)/ansible-provision.log
 
 
@@ -118,7 +118,7 @@ destroy: init .directory-MODULE .check-region
 	@echo -e "\n\n\n\nkubernetes-destroy: $(date +"%Y-%m-%d @ %H:%M:%S")\n"       \
 		>> $(LOGS_DIR)/kubernetes-destroy.log
 	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform destroy             \
-		-state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
+		-state=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate                     \
 		-var default_keypair_public_key="$(SIGNATURE)"                              \
 		-var default_keypair_name=$(ROLE)                                           \
 		-var region=$(REGION)                                                       \
@@ -127,10 +127,10 @@ destroy: init .directory-MODULE .check-region
 
 
 ssh: .directory-MODULE
-	exec `terraform output -state=$(STATE_DIR)/$(ROLE)_terraform.tfstate          \
+	exec `terraform output -state=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate \
 	|head -1 |awk -F' = ' '{print$$2}' |sed 's/.\//..\//'`
 
 
 purge: destroy clean
-	@rm -f $(STATE_DIR)/$(ACCOUNT_ID)/${REGION}-rds.tfstate
+	@rm -f $(STATE_DIR)/$(ACCOUNT_ID)/$(ROLE)_$(REGION)_terraform.tfstate
 	@rm -f $(KEYS_DIR)/*$(ACCOUNT_ID)-${REGION}*

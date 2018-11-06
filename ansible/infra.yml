@@ -7,6 +7,12 @@
   gather_facts: false # As Python is not yet installed, we cannot gather host facts
 
   tasks:
+    - name: Update distros
+      raw: "apt-get update -y"
+      become: true
+      retries: 10
+      delay: 20
+
     - name: Install Python
       raw: "apt-get -y -q install python"
       become: true

@@ -116,7 +116,9 @@ terraform: init .directory-MODULE .check-region
 
 provision: .roles
 	export TF_STATE=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate            ; \
-	ansible-playbook -v --inventory-file=$(INVENTORY) infra.yml                   \
+	ansible-playbook infra.yml                                                    \
+		--extra-vars "ec2_private_dns_name=`terraform output -state=$$TF_STATE |head -1 |awk -F' = ' '{print$$2}'`" \
+		--inventory-file=$(INVENTORY)                                               \
 	2>&1 |tee $(LOGS_DIR)/ansible-provision.log
 
 

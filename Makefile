@@ -40,6 +40,11 @@ define chdir
 	$(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
 endef
 
+.preflight:
+	@mkdir -p $(STATE_DIR)
+	@mkdir -p $(LOGS_DIR)
+	@mkdir -p $(KEYS_DIR)
+
 .check-region:
 	@if test "$(REGION)" = ""; then  echo "REGION not set"; exit 1; fi
 
@@ -89,7 +94,7 @@ test:
 # - follows standard design patterns
 ###############################################
 
-init: .directory-MODULE
+init: .preflight .directory-MODULE
 	terraform init
 
 terraform: init .directory-MODULE .check-region

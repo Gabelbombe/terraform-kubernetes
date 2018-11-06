@@ -3,14 +3,15 @@ variable "control_cidr" {
   default     = "174.102.0.0/18"
 }
 
+## ssh-keygen -y -f GEHC-037
 variable "default_keypair_public_key" {
   description = "Public Key of the default keypair"
-  default     = "GEHC-037"
+  default     = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCUwCqL3CF7aEJbEJGZFtHImz+QdeNVD8ZR8ogj+HQZN50vQXVx/ciGtDAGaFrpjhrpwrUx26etXC3Hz61x2V/kuwp8VdjKQkcGgFXPao0VanzLe6+YHiCtQ6NWK2Or4BzgsuTHysdWj/afEbxFkzlkOImC4HljujiJ2ng70+Moa8ehaxeMuHJoZdck1EwoqTCOegG/rMxe6Xf5S3IlkIpUFdgtRb2We3qXGeNz0PkYAnU2C8doavgPNCvo46qPXQeq/SN1TcoJaiPHxrCbsdb5cntbXPkvax2U+QcnjkYwigpEOO4qBQg06Klj0+iJageBP7Zr0ftZyfTMV3kQQ6y5"
 }
 
 variable "default_keypair_name" {
   description = "Name of the KeyPair used for all nodes"
-  default     = ""
+  default     = "GEHC-037"
 }
 
 variable "vpc_name" {

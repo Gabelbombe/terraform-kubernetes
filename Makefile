@@ -1,5 +1,4 @@
-ROLE          ?= GEHC-037     ## make {func} ROLE=<AWS_ACCOUNT_ROLE>
-
+ROLE          ?= GEHC-037    ## make {func} ROLE=<AWS_ACCOUNT_ROLE>
 REGION        ?= us-east-1   ## make {func} REGION=<AWS_TARGET_REGION>
 
 
@@ -19,11 +18,12 @@ INVENTORY     := $(shell which terraform-inventory |awk '{print$3}')
 
 STATE_DIR     := $(BASE_DIR)/_states/$(ACCOUNT_ID)
 LOGS_DIR      := $(BASE_DIR)/_logs/$(ACCOUNT_ID)
-KEYS_DIR      := $(BASE_DIR)/_keys/$(ACCOUNT_ID)
+KEYS_DIR      := $(BASE_DIR)/_keys
 
-MODULE        := $(BASE_DIR)/modules
+MODULE        := $(BASE_DIR)/modules/kubernetes
 ANSIBLE       := $(BASE_DIR)/ansible
 
+SIGNATURE     := $(shell ssh-keygen -y -f $(KEYS_DIR)/$(ROLE))
 
 ## Default generics to test until I move it over to Rake
 default: test
@@ -118,23 +118,28 @@ test:
 # - follows standard design patterns
 ###############################################
 
-terraform: .directory-HACK .check-region
-    mkdir -p $(LOGS_DIR) && terraform init .                                    ; \
-    aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform plan                \
-    2>&1 |tee $(LOGS_DIR)/rds-plan.log                                          ; \
+terraform: .directory-MODULE .check-region
+    mkdir -p $(LOGS_DIR) && terraform init .                                  ; \
+    aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform plan              \
+			-var default_keypair_public_key="$(SIGNATURE)" \
+			-var default_keypair_name="$(ROLE)" \
+    2>&1 |tee $(LOGS_DIR)/plan.log                                            ; \
                                                                                 \
     aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform apply               \
         -state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
+				-var default_keypair_public_key="$(SIGNATURE)" \
+				-var default_keypair_name="$(ROLE)" \
         -auto-approve                                                               \
-    2>&1 |tee $(LOGS_DIR)/rds-apply.log
+    2>&1 |tee $(LOGS_DIR)/apply.log
 
-destroy: .directory-HACK .check-region
+destroy: .directory-MODULE .check-region
     mkdir -p $(LOGS_DIR) && terraform init .                                    ; \
     aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform destroy             \
         -state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
-#        -var region=$(REGION)                                                            \
+				-var default_keypair_public_key="$(SIGNATURE)" \
+				-var default_keypair_name="$(ROLE)" \
         -auto-approve                                                               \
-    2>&1 |tee $(LOGS_DIR)/rds-destroy.log
+    2>&1 |tee $(LOGS_DIR)/destroy.log
 
 
 purge: destroy clean

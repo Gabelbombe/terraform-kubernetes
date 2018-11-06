@@ -28,6 +28,6 @@ resource "null_resource" "ssh_cfg" {
   }
 
   provisioner "local-exec" {
-    command = "`pwd` && echo '${ data.template_file.ssh_cfg.rendered }' > ../ssh.cfg"
+    command = "echo '${ data.template_file.ssh_cfg.rendered }' >| ../../ssh.cfg"
   }
 }

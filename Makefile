@@ -27,53 +27,53 @@ SIGNATURE     := $(shell ssh-keygen -y -f $(KEYS_DIR)/$(ROLE))
 
 ## Default generics to test until I move it over to Rake
 default: test
-all:     terraform
-rebuild: destroy
-
+all:     terraform provision
+rebuild: destroy all
 
 
 ###############################################
 # Helper functions
-# - follows standard design patterns
+# - follows best practices design patterns
 ###############################################
 define chdir
-    $(eval _D=$(firstword $(1) $(@D)))
-    $(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
+	$(eval _D=$(firstword $(1) $(@D)))
+	$(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
 endef
 
 .check-region:
-    @if test "$(REGION)" = ""; then echo "REGION not set"; exit 1; fi
+	@if test "$(REGION)" = ""; then  echo "REGION not set"; exit 1; fi
+
+.check-role:
+		@if test "$(ROLE)" = ""; then  echo "ROLE not set"; exit 1; fi
 
 .directory-%:
-    $(call chdir, ${${*}})
+	$(call chdir, ${${*}})
 
 .assert-%:
-    @if [ "${${*}}" = "" ]; then                                                  \
+	@if [ "${${*}}" = "" ]; then                                                  \
     echo "[✗] Variable ${*} not set"  ; exit 1                                ; \
-    else                                                                          \
-        echo "[√] ${*} set as: ${${*}}"                                           ; \
-    fi
+	else                                                                          \
+		echo "[√] ${*} set as: ${${*}}"                                           ; \
+	fi
 
+.roles: .directory-ANSIBLE
+	sed -e "s/<SSH_KEYFILE>/$(ROLE)/" ansible.tmpl.cfg >| ansible.cfg
 
 
 ###############################################
 # Generic functions
-# - follows standard design patterns
 ###############################################
 graph: .directory-MODULE
-    terraform init && terraform graph |dot -Tpng >| $(LOGS_DIR)/graph.png
+	terraform init && terraform graph |dot -Tpng >| $(LOGS_DIR)/graph.png
 
 clean:
-    @rm -rf $(TERRAFORM)/.terraform
-    @rm -f  $(LOGS_DIR)/graph.png
-    @rm -f  $(LOGS_DIR)/*.log
-
+	@rm -rf $(TERRAFORM)/.terraform
+	@rm -f  $(LOGS_DIR)/graph.png
+	@rm -f  $(LOGS_DIR)/*.log
 
 globals:
-    @echo "REGION set to: $(REGION)"
-    @echo "ROLE   set to: $(ROLE)"
-
-
+	@echo "REGION set to: $(REGION)"
+	@echo "ROLE   set to: $(ROLE)"
 
 ###############################################
 # Testing functions
@@ -81,36 +81,7 @@ globals:
 ###############################################
 
 test:
-    @echo "[info] Testing Terraform"
-    @if ! terraform fmt -write=false -check=true >> /dev/null; then               \
-        echo "[✗] Terraform fmt failed: $$d"                                      ; \
-        exit 1                                                                    ; \
-    else                                                                          \
-        echo "[√] Terraform fmt"                                                  ; \
-    fi
-    @for d in $$(find . -type f -name '*.tf' -path "./targets/*" -not -path "**/.terraform/*" -exec dirname {} \; | sort -u); do \
-        cd $$d                                                                    ; \
-        terraform init -backend=false >> /dev/null                                ; \
-        terraform validate -check-variables=false                                 ; \
-        if [ $$? -eq 1 ]; then                                                      \
-            echo "[✗] Terraform validate failed: $$d"                               ; \
-            exit 1                                                                  ; \
-        fi                                                                        ; \
-    done
-    @echo "[√] terraform validate targets (not including variables)"
-    @for d in $$(find . -type f -name '*.tf' -path "./examples/*" -not -path "**/.terraform/*" -exec dirname {} \; | sort -u); do \
-        cd $$d                                 ; \
-        terraform init -backend=false >> /dev/null;                                 \
-        terraform validate;                                                         \
-        if [ $$? -eq 1 ]; then                                                      \
-            echo "[✗] Terraform validate failed: $$d";                                \
-            exit 1;                                                                   \
-        fi;                                                                         \
-    done
-    @echo "[√] Terraform validate examples"
-
-.PHONY: default test
-
+	@echo 'No tests currently configured...'
 
 
 ###############################################
@@ -118,30 +89,46 @@ test:
 # - follows standard design patterns
 ###############################################
 
-terraform: .directory-MODULE .check-region
-    mkdir -p $(LOGS_DIR) && terraform init .                                  ; \
-    aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform plan              \
-			-var default_keypair_public_key="$(SIGNATURE)" \
-			-var default_keypair_name="$(ROLE)" \
-    2>&1 |tee $(LOGS_DIR)/plan.log                                            ; \
-                                                                                \
-    aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform apply               \
-        -state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
-				-var default_keypair_public_key="$(SIGNATURE)" \
-				-var default_keypair_name="$(ROLE)" \
-        -auto-approve                                                               \
-    2>&1 |tee $(LOGS_DIR)/apply.log
+init: .directory-MODULE
+	terraform init
 
-destroy: .directory-MODULE .check-region
-    mkdir -p $(LOGS_DIR) && terraform init .                                    ; \
-    aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform destroy             \
-        -state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
-				-var default_keypair_public_key="$(SIGNATURE)" \
-				-var default_keypair_name="$(ROLE)" \
-        -auto-approve                                                               \
-    2>&1 |tee $(LOGS_DIR)/destroy.log
+terraform: init .directory-MODULE .check-region
+	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform plan                \
+		-var region=$(REGION)                                                       \
+		-var key_name=$(ROLE)                                                       \
+	2>&1 |tee $(LOGS_DIR)/kubernetes-plan.log                                      ; \
+                                                                                \
+	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform apply               \
+		-state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
+		-var region=$(REGION)                                                       \
+		-var key_name=$(ROLE)                                                       \
+		-auto-approve                                                               \
+	2>&1 |tee $(LOGS_DIR)/kubernetes-apply.log
+
+
+
+provision: .roles
+	export TF_STATE=$(STATE_DIR)/$(ROLE)_terraform.tfstate                      ; \
+	ansible-playbook -v --inventory-file=$(INVENTORY) jenkins.yml                 \
+	2>&1 |tee $(LOGS_DIR)/ansible-provision.log
+
+
+destroy: init .directory-MODULE .check-region
+	@echo -e "\n\n\n\nkubernetes-destroy: $(date +"%Y-%m-%d @ %H:%M:%S")\n"          \
+		>> $(LOGS_DIR)/kubernetes-destroy.log
+	aws-vault exec $(ROLE) --assume-role-ttl=60m -- terraform destroy             \
+		-state=$(STATE_DIR)/$(ROLE)_terraform.tfstate                               \
+		-var region=$(REGION)		                                                    \
+		-var key_name=$(ROLE)                                                       \
+		-auto-approve                                                               \
+	2>&1 |tee $(LOGS_DIR)/kubernetes-destroy.log
+
+
+ssh: .directory-MODULE
+	exec `terraform output -state=$(STATE_DIR)/$(ROLE)_terraform.tfstate          \
+	|head -1 |awk -F' = ' '{print$$2}' |sed 's/.\//..\//'`
 
 
 purge: destroy clean
-    @rm -f $(STATE_DIR)/$(ACCOUNT_ID)/${REGION}-rds.tfstate
-    @rm -f $(KEYS_DIR)/*$(ACCOUNT_ID)-${REGION}*
+	@rm -f $(STATE_DIR)/$(ACCOUNT_ID)/${REGION}-rds.tfstate
+	@rm -f $(KEYS_DIR)/*$(ACCOUNT_ID)-${REGION}*

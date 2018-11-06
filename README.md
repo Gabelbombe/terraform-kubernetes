@@ -1,4 +1,5 @@
 # Terraform Kubernetes module
+_Build and deploy Kubernetes with Terraform and Ansible_
 
 A worked example to provision a Kubernetes cluster on AWS from scratch, using Terraform and Ansible.
 - AWS VPC
@@ -11,19 +12,69 @@ A worked example to provision a Kubernetes cluster on AWS from scratch, using Te
 
 *This is a learning tool, not a production-ready setup.*
 
+## Prerequisites
+
+Valid named AWS profiles should already be setup in your `~/.aws/config` file.  We'll assume in the rest of this guide that the profile you want to use is called `sandbox`.
+
+You'll also need local copies of `terraform`, `terraform-inventory`, `aws-vault`, `ansible` and `cfssl`.  My (confirmed working) version info follows:
+
+
 ## Requirements
 
 Requirements on control machine:
 
-- Terraform (tested with Terraform 0.7.0; **NOT compatible with Terraform 0.6.x**)
-- Python (tested with Python 2.7.12, may be not compatible with older versions; requires Jinja2 2.8)
+- Terraform (tested with Terraform 0.11.8; **NOT compatible with Terraform 0.6.x**)
+- Terraform Inventory
+- Python (tested with Python 2.7.15, may be not compatible with older versions; requires Jinja2 2.8)
 - Python *netaddr* module
-- Ansible (tested with Ansible 2.1.0.0)
-- *cfssl* and *cfssljson*:  https://github.com/cloudflare/cfssl
+- Ansible (tested with Ansible 2.6.3)
+- AWS Vault
+- [*cfssl* and *cfssljson*](https://github.com/cloudflare/cfssl)
 - Kubernetes CLI
 - SSH Agent
 - (optionally) AWS CLI
 
+**[AWS Vault](https://github.com/99designs/aws-vault)** is a AWS secrets to for authenticating from the command line.  On OSX it can be installed with `brew cask install aws-vault`
+
+**[Terraform Inventory](https://github.com/99designs/aws-vault)** is a command line tool which generates a dynamic Ansible inventory from a Terraform state file. `brew install terraform-inventory`
+
+
+## Amazon credentials setup for Multi-Account
+
+I'm implementing this as a _Security First_ implementation, so have set this up with roles in mind (not IAM Users, which is a security vector). With this in mind, I utilize a `Zero Trust` account, then  role assume out of it. Due to this your credentials should mirror this setup.
+
+##### ~/.aws/credentials
+
+```bash
+[master]
+aws_access_key_id     = xxxx
+aws_secret_access_key = xxxx
+```
+
+
+##### ~/.aws/config
+
+```bash
+[profile sandbox]
+source_profile  = master
+role_arn        = arn:aws:iam::${sandbox_account_number}:role/${sts_role_assumption_name}
+mfa_serial      = arn:aws:iam::${zerotrust_account_number}:mfa/${mfa_id}
+external_id     = ${sandbox_account_number}
+
+
+[profile engineering]
+source_profile  = master
+role_arn        = arn:aws:iam::${engineering_account_number}:role/${sts_role_assumption_name}
+mfa_serial      = arn:aws:iam::${zerotrust_account_number}:mfa/${mfa_id}
+external_id     = ${engineering_account_number}
+
+
+[profile production]
+source_profile  = master
+role_arn        = arn:aws:iam::${production_account_number}:role/${sts_role_assumption_name}
+mfa_serial      = arn:aws:iam::${zerotrust_account_number}:mfa/${mfa_id}
+external_id     = ${production_account_number}
+```
 
 ## AWS Credentials
 
@@ -33,20 +84,6 @@ You need a valid AWS Identity (`.pem`) file and the corresponding Public Key. Te
 
 Please read [AWS Documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#how-to-generate-your-own-key-and-import-it-to-aws) about supported formats.
 
-### Terraform and Ansible authentication
-
-Both Terraform and Ansible expect AWS credentials set in environment variables:
-```
-$ export AWS_ACCESS_KEY_ID=<access-key-id>
-$ export AWS_SECRET_ACCESS_KEY="<secret-key>"
-```
-
-If you plan to use AWS CLI you have to set `AWS_DEFAULT_REGION`.
-
-Ansible expects the SSH identity loaded by SSH agent:
-```
-$ ssh-add <keypair-name>.pem
-```
 
 ## Defining the environment
 
@@ -89,13 +126,13 @@ By default, the project uses `us-east-1`. To use a different AWS Region, set add
 
 You also have to edit `./ansible/hosts/ec2.ini`, changing `regions = us-east-1` to the new Region.
 
+
 ## Provision infrastructure, with Terraform
 
-Run Terraform commands from `./terraform` subdirectory.
+Run Make wrapped Terraform commands from the base directory.
 
 ```
-$ terraform plan
-$ terraform apply
+$ make terraform
 ```
 
 Terraform outputs public DNS name of Kubernetes API and Workers public IPs.
@@ -110,6 +147,7 @@ Outputs:
 
 You will need them later (you may show them at any moment with `terraform output`).
 
+
 ### Generated SSH config
 
 Terraform generates `ssh.cfg`, SSH configuration file in the project directory.
@@ -120,19 +158,21 @@ e.g.
 $ ssh -F ssh.cfg worker0
 ```
 
+
 ## Install Kubernetes, with Ansible
 
-Run Ansible commands from `./ansible` subdirectory.
+Run Make wrapped Ansible commands from the base directory.
 
-We have multiple playbooks.
+There are multiple playbooks, so make sure to look in the ansible directory as well as the `Makefile`.
 
 ### Install and set up Kubernetes cluster
 
 Install Kubernetes components and *etcd* cluster.
 ```
-$ ansible-playbook infra.yaml
+$ make provision
 ```
 
+### BELOW WILL BE DEPRECATED
 ### Setup Kubernetes CLI
 
 Configure Kubernetes CLI (`kubectl`) on your machine, setting Kubernetes API endpoint (as returned by Terraform).

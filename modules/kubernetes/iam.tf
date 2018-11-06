@@ -61,6 +61,6 @@ EOF
 
 # IAM Instance Profile for Controller
 resource "aws_iam_instance_profile" "kubernetes" {
-  name  = "kubernetes"
-  roles = ["${aws_iam_role.kubernetes.name}"]
+  name = "kubernetes"
+  role = "${aws_iam_role.kubernetes.name}"
 }

@@ -198,6 +198,7 @@ ip-10-43-0-31.us-east-1.compute.internal   Ready     6m
 ip-10-43-0-32.us-east-1.compute.internal   Ready     6m
 ```
 
+### BELOW WILL BE DEPRECATED
 ### Setup Pod cluster routing
 
 Set up additional routes for traffic between Pods.

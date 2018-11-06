@@ -1,9 +1,11 @@
 variable "control_cidr" {
   description = "CIDR for maintenance: inbound traffic will be allowed from this IPs"
+  default     = "174.102.0.0/18"
 }
 
 variable "default_keypair_public_key" {
   description = "Public Key of the default keypair"
+  default     = "GEHC-037"
 }
 
 variable "default_keypair_name" {

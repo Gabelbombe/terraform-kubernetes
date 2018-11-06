@@ -12,11 +12,10 @@ A worked example to provision a Kubernetes cluster on AWS from scratch, using Te
 
 *This is a learning tool, not a production-ready setup.*
 
+
 ## Prerequisites
 
 Valid named AWS profiles should already be setup in your `~/.aws/config` file.  We'll assume in the rest of this guide that the profile you want to use is called `sandbox`.
-
-You'll also need local copies of `terraform`, `terraform-inventory`, `aws-vault`, `ansible` and `cfssl`.  My (confirmed working) version info follows:
 
 
 ## Requirements
@@ -75,6 +74,7 @@ role_arn        = arn:aws:iam::${production_account_number}:role/${sts_role_assu
 mfa_serial      = arn:aws:iam::${zerotrust_account_number}:mfa/${mfa_id}
 external_id     = ${production_account_number}
 ```
+
 
 ## AWS Credentials
 

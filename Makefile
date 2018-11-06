@@ -1,6 +1,6 @@
-ROLE          ?= GEHC-037    ## make {func} ROLE=<AWS_ACCOUNT_ROLE>
-REGION        ?= us-east-1   ## make {func} REGION=<AWS_TARGET_REGION>
-
+ROLE          ?= GEHC-037     ## make {func} ROLE=<AWS_ACCOUNT_ROLE>
+REGION        ?= us-east-1    ## make {func} REGION=<AWS_TARGET_REGION>
+CIDR          ?= '0.0.0.0/0'  ## make {func} CIDR=<inbound traffic block for maintenance>
 
 
 ###############################################
@@ -107,6 +107,7 @@ terraform: init .directory-MODULE .check-region
 		-state=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate                     \
 		-var default_keypair_public_key="$(SIGNATURE)"                              \
 		-var default_keypair_name=$(ROLE)                                           \
+		-var control_cidr="0.0.0.0/0"                                               \
 		-var region=$(REGION)                                                       \
 		-auto-approve                                                               \
 	2>&1 |tee $(LOGS_DIR)/kubernetes-apply.log
@@ -126,6 +127,7 @@ destroy: init .directory-MODULE .check-region
 		-state=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate                     \
 		-var default_keypair_public_key="$(SIGNATURE)"                              \
 		-var default_keypair_name=$(ROLE)                                           \
+		-var control_cidr="0.0.0.0/0"                                               \
 		-var region=$(REGION)                                                       \
 		-auto-approve                                                               \
 	2>&1 |tee $(LOGS_DIR)/kubernetes-destroy.log
@@ -137,5 +139,5 @@ ssh: .directory-MODULE
 
 
 purge: destroy clean
-	@rm -f $(STATE_DIR)/$(ACCOUNT_ID)/$(ROLE)_$(REGION)_terraform.tfstate
+	@rm -f $(STATE_DIR)/$(ACCOUNT_ID)$(ROLE)_$(REGION)_terraform.tfstate
 	@rm -f $(KEYS_DIR)/*$(ACCOUNT_ID)-${REGION}*

@@ -107,6 +107,11 @@
     - kubelet
   become: true
 
+- name: Dump variables
+  local_action:
+    module: debug
+      var=groups[controller]
+
 - name: Add Kubelet configuration
   template:
     src: kubeconfig.j2

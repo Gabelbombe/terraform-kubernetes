@@ -110,7 +110,7 @@
 - name: Dump variables
   local_action:
     module: debug
-      var=groups[controller]
+      var=groups['controller']
 
 - name: Add Kubelet configuration
   template:

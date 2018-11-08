@@ -129,7 +129,9 @@ kubectl: .directory-ANSIBLE
 	echo -e "\n\n\n\kubectl.yml: $(date +"%Y-%m-%d @ %H:%M:%S")\n"                \
 		>> $(LOGS_DIR)/ansible-kubectl-provision.log                              ; \
 	ansible-playbook -v kubectl.yml                                               \
-		--extra-vars "kubernetes_api_endpoint=`terraform output -state=$$TF_STATE |head -1 |awk -F' = ' '{print$$2}'`" \
+		--extra-vars "kubernetes_api_endpoint=`terraform output -state=$$TF_STATE   \
+			|grep kubernetes_api_dns_name                                             \
+			|awk -F' = ' '{print$$2}'`"                                               \
 		--inventory-file=$(INVENTORY)                                               \
 	2>&1 |tee $(LOGS_DIR)/ansible-kubectl-provision.log
 

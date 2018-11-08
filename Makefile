@@ -120,7 +120,7 @@ infra: .directory-ANSIBLE
 	export TF_STATE=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate            ; \
 	echo -e "\n\n\n\ninfra.yml: $(date +"%Y-%m-%d @ %H:%M:%S")\n"                 \
 		>> $(LOGS_DIR)/ansible-infra-provision.log                                ; \
-	ansible-playbook -v infra.yml                                                 \
+	ansible-playbook -v infra.yml                                              \
 		--inventory-file=$(INVENTORY)                                               \
 	2>&1 |tee $(LOGS_DIR)/ansible-infra-provision.log
 

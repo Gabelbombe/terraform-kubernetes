@@ -23,16 +23,16 @@
 #######################
 # Setup K8s components
 #######################
-
-- hosts: etcd
-  roles:
-    - common
-    - etcd
-
-- hosts: controller
-  roles:
-    - common
-    - controller
+# 
+# - hosts: etcd
+#   roles:
+#     - common
+#     - etcd
+#
+# - hosts: controller
+#   roles:
+#     - common
+#     - controller
 
 - hosts: worker
   roles:

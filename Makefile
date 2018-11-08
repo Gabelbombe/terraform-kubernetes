@@ -118,18 +118,18 @@ provision: .roles infra kubectl
 
 infra: .directory-ANSIBLE
 	export TF_STATE=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate            ; \
-	echo -e "\n\n\n\ninfra.yml: $(date +"%Y-%m-%d @ %H:%M:%S")\n"                \
+	echo -e "\n\n\n\ninfra.yml: $(date +"%Y-%m-%d @ %H:%M:%S")\n"                 \
 		>> $(LOGS_DIR)/ansible-infra-provision.log                                ; \
-	ansible-playbook infra.yml                                              \
+	ansible-playbook -v infra.yml                                                 \
 		--extra-vars "ec2_private_dns_name=`terraform output -state=$$TF_STATE |head -1 |awk -F' = ' '{print$$2}'`" \
 		--inventory-file=$(INVENTORY)                                               \
 	2>&1 |tee $(LOGS_DIR)/ansible-infra-provision.log
 
 kubectl: .directory-ANSIBLE
 	export TF_STATE=$(STATE_DIR)/$(ROLE)_$(REGION)_terraform.tfstate            ; \
-	echo -e "\n\n\n\kubectl.yml: $(date +"%Y-%m-%d @ %H:%M:%S")\n"               \
+	echo -e "\n\n\n\kubectl.yml: $(date +"%Y-%m-%d @ %H:%M:%S")\n"                \
 		>> $(LOGS_DIR)/ansible-kubectl-provision.log                              ; \
-	ansible-playbook -vvvv kubectl.yml                                              \
+	ansible-playbook -v kubectl.yml                                               \
 		--extra-vars "kubernetes_api_endpoint=`terraform output -state=$$TF_STATE |head -1 |awk -F' = ' '{print$$2}'`" \
 		--inventory-file=$(INVENTORY)                                               \
 	2>&1 |tee $(LOGS_DIR)/ansible-kubectl-provision.log

@@ -135,6 +135,12 @@
 # Kube-proxy
 #############
 
+- name: Frontload controller0 ip
+  shell: "echo -ne '{{ item }}' |grep -A1 controller0 |tail -1 |awk '{print$2}'"
+  with_file:
+    - "{{playbook_dir}}/../ssh.cfg"
+  register: controller
+
 - name: Add kube-proxy systemd unit
   template:
     src: kube-proxy.service.j2

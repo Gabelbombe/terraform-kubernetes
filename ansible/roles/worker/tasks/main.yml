@@ -107,10 +107,10 @@
     - kubelet
   become: true
 
-- name: Dump variables
-  local_action:
-    module: debug
-      var=groups['controller']
+- debug:
+    msg: "{{ item }}"
+  with_file:
+    - "{{ playbook_dir }}/../ssh.cfg"
 
 - name: Add Kubelet configuration
   template:

@@ -14,7 +14,7 @@
   tasks:
 
   - name: Launch 3 ngix pods
-    command: "kubectl run nginx --image=nginx --port=80 --replicas=3"
+    command: "kubectl run nginx --image=nginx --port=80 --replicas=3 --generator=run-pod/v1"
 
   - name: Expose nginx
     command: "kubectl expose deployment nginx --type NodePort"

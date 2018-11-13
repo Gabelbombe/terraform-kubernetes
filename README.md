@@ -131,14 +131,14 @@ We have multiple playbooks.
 
 Install Kubernetes components and *etcd* cluster.
 ```
-$ ansible-playbook infra.yaml
+$ ansible-playbook infra.yml
 ```
 
 ### Setup Kubernetes CLI
 
 Configure Kubernetes CLI (`kubectl`) on your machine, setting Kubernetes API endpoint (as returned by Terraform).
 ```
-$ ansible-playbook kubectl.yaml --extra-vars "kubernetes_api_endpoint=<kubernetes-api-dns-name>"
+$ ansible-playbook kubectl.yml --extra-vars "kubernetes_api_endpoint=<kubernetes-api-dns-name>"
 ```
 
 Verify all components and minions (workers) are up and running, using Kubernetes CLI (`kubectl`).
@@ -163,14 +163,14 @@ ip-10-43-0-32.us-east-1.compute.internal   Ready     6m
 
 Set up additional routes for traffic between Pods.
 ```
-$ ansible-playbook kubernetes-routing.yaml
+$ ansible-playbook kubernetes-routing.yml
 ```
 
 ### Smoke test: Deploy *nginx* service
 
 Deploy a *ngnix* service inside Kubernetes.
 ```
-$ ansible-playbook kubernetes-nginx.yaml
+$ ansible-playbook kubernetes-nginx.yml
 ```
 
 Verify pods and service are up and running.

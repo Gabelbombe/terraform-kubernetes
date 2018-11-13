@@ -5,7 +5,7 @@
 #######################################
 
 # Expects kubectl being configured on the local machine
-# using kubectl.yaml playbook
+# using kubectl.yml playbook
 
 
 - hosts: localhost

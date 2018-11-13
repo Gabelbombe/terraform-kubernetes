@@ -1,3 +1,2 @@
 /kubernetes-csr.json
 *.csr
-*.pem

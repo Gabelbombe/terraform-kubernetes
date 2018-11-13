@@ -8,7 +8,7 @@ variable default_keypair_public_key {
 
 variable default_keypair_name {
   description = "Name of the KeyPair used for all nodes"
-  default     = "k8s-not-the-hardest-way"
+  default     = "kubernetes-keypair"
 }
 
 variable vpc_name {
@@ -85,15 +85,4 @@ variable worker_instance_type {
 
 variable kubernetes_cluster_dns {
   default = "10.31.0.1"
-}
-
-resource "aws_vpc" "kubernetes" {
-  cidr_block           = "10.43.0.0/16"
-  enable_dns_hostnames = true
-}
-
-resource "aws_subnet" "kubernetes" {
-  vpc_id            = "${aws_vpc.kubernetes.id}"
-  cidr_block        = "10.43.0.0/16"
-  availability_zone = "eu-west-1a"
 }

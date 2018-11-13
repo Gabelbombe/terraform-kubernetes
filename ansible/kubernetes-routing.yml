@@ -20,7 +20,9 @@
   - name: Gather Kubernetes nodes facts (on localhost)
     local_action: command kubectl get nodes --output=json
     register: result
-  - set_fact:
+
+  - name: Set facts on "kubernetes_nodes"
+    set_fact:
       kubernetes_nodes: "{{ result.stdout | from_json }}"
 
   # Extract Pod addresses
@@ -31,14 +33,15 @@
       - "{{ kubernetes_nodes['items']|map(attribute='status')|map(attribute='addresses')|list }}"
     register: node_addresses_tmp
     no_log: True
-  - set_fact:
+
+  - name: Set facts on "kubernetes_nodes_addresses"
+    set_fact:
      kubernetes_nodes_addresses: "{{ node_addresses_tmp.results|map(attribute='item')|selectattr('type','equalto','InternalIP')|map(attribute='address')|list }}"
-#  - debug: var=kubernetes_nodes_addresses
 
   # Extract Pod CIDRs
-  - set_fact:
+  - name: Set facts on "kubernetes_pod_cidrs"
+    set_fact:
       kubernetes_pod_cidrs: "{{ kubernetes_nodes['items']|map(attribute='spec')|map(attribute='podCIDR')|list }}"
-#  - debug: var=kubernetes_pod_cidrs
 
   - name: Add pod routes
     command: "route add -net {{ item.0|ipaddr('network') }} netmask {{ item.0|ipaddr('netmask') }} gw {{ item.1|ipaddr('address') }} metric 1"
@@ -53,7 +56,8 @@
     become: true
     register: result
 
-  - assert:
+  - name: Running assertations
+    assert:
       that: # TODO Make assertions more strict
         - "'{{ kubernetes_pod_cidrs[0]|ipaddr('network') }}' in result.stdout"
         - "'{{ kubernetes_pod_cidrs[1]|ipaddr('network') }}' in result.stdout"

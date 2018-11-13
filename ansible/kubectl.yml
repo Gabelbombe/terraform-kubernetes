@@ -11,7 +11,7 @@
 
   vars:
     kubernetes_api_endpoint_port: 6443
-    kubernetes_cluster_name: "kubernetes-not-the-hardest-way"
+    kubernetes_cluster_name: "kubernetes-hackathon"
     certificate_path: "{{ playbook_dir }}/../cert"
 
     # Credentials must match those defined in templates/var/lib/kubernetes/token.csv

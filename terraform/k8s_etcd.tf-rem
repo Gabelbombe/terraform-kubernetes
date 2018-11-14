@@ -1,10 +1,13 @@
-########################## etcd cluster instances
+##########################
+# etcd cluster instances
 #########################
 
 resource "aws_instance" "etcd" {
-  count         = 3
-  ami           = "${lookup(var.amis, var.region)}"
-  instance_type = "${var.etcd_instance_type}"
+  count = 3
+  ami   = "${lookup(var.amis, var.region)}"
+
+  instance_type        = "${var.etcd_instance_type}"
+  iam_instance_profile = "${aws_iam_instance_profile.kubernetes.id}"
 
   subnet_id                   = "${aws_subnet.kubernetes.id}"
   private_ip                  = "${cidrhost(var.vpc_cidr, 10 + count.index)}"

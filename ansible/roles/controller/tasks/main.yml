@@ -86,10 +86,10 @@
     - kube-scheduler
   become: true
 
-- name: Wait for 1 minutes while services get themselves sorted
-  wait_for:
-    timeout: 60
-  delegate_to: localhost
+# - name: Wait for 1 minutes while services get themselves sorted
+#   wait_for:
+#     timeout: 60
+#   delegate_to: localhost
 
 - name: Verify Kubernetes status
   shell: kubectl get componentstatuses

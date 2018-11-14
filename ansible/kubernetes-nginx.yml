@@ -1,5 +1,4 @@
 ---
-
 #######################################
 # Deploy and expose Nginx service
 #######################################
@@ -7,20 +6,22 @@
 # Expects kubectl being configured on the local machine
 # using kubectl.yml playbook
 
-
 - hosts: localhost
   connection: local
 
   tasks:
 
-  - name: Launch 3 ngix pods
-    command: "kubectl run nginx --image=nginx --port=80 --replicas=3 --generator=run-pod/v1"
+  - name: Launching an NGINX pod
+    command: "kubectl create deployment nginx --image=nginx --generator=deployment-basic/v1beta1"
 
-  - name: Expose nginx
-    command: "kubectl expose deployment nginx --type NodePort"
+  - name: Scaling NGINX to 3 pods
+    command: "kubectl scale deployment --replicas 3 nginx"
+
+  - name: Expose NGINX
+    command: "kubectl expose deployment nginx --port=80 --type=LoadBalancer"
 
   - name: Get exposed port
-    command: "kubectl get svc nginx --output=jsonpath='{range .spec.ports[0]}{.nodePort}'"
+    command: "kubectl get service nginx --output=jsonpath='{range .spec.ports[0]}{.nodePort}'"
     register: result
   - set_fact:
       node_port: "{{ result.stdout }}"

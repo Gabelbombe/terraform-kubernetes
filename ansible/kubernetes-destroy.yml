@@ -1,0 +1,34 @@
+---
+#######################################
+# Destroy Nginx service
+#######################################
+
+# Expects kubectl being configured on the local machine
+# using kubectl.yml playbook
+
+- hosts: localhost
+  connection: local
+
+  tasks:
+
+  - name: Destroy NGINX deployment
+    command: "kubectl delete deplyoment nginx"
+
+  - name: Get deployement
+    command: "kubectl get deployment"
+    register: result
+  - set_fact:
+      deployment_status: "{{ result.stdout }}"
+
+  - debug: msg="Deployment Status {{ deployment_status }}"
+
+  - name: Destroy NGINX service
+    command: "kubectl delete service nginx"
+
+  - name: Get service
+    command: "kubectl get service"
+    register: result
+  - set_fact:
+      service_status: "{{ result.stdout }}"
+
+  - debug: msg="Service Status {{ service_status }}"

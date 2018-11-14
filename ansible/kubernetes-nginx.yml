@@ -15,7 +15,7 @@
     command: "kubectl create deployment nginx --image=nginx --generator=deployment-basic/v1beta1"
 
   - name: Scaling NGINX to 3 pods
-    command: "kubectl scale deployment --replicas 3 nginx"
+    command: "kubectl scale deployment nginx --replicas 3"
 
   - name: Expose NGINX
     command: "kubectl expose deployment nginx --port=80 --type=LoadBalancer"

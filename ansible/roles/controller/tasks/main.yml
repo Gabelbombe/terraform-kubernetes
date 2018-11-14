@@ -86,9 +86,9 @@
     - kube-scheduler
   become: true
 
-- name: Wait for 3 minutes while services get themselves sorted
+- name: Wait for 1 minutes while services get themselves sorted
   wait_for:
-    timeout: 180
+    timeout: 60
   delegate_to: localhost
 
 - name: Verify Kubernetes status

@@ -12,10 +12,7 @@
   tasks:
 
   - name: Destroy NGINX deployment
-    command: "kubectl delete deplyoment nginx"
-
-  - name: Get deployement
-    command: "kubectl get deployment"
+    command: "kubectl delete deplyoment --all"
     register: result
   - set_fact:
       deployment_status: "{{ result.stdout }}"
@@ -24,9 +21,6 @@
 
   - name: Destroy NGINX service
     command: "kubectl delete service nginx"
-
-  - name: Get service
-    command: "kubectl get service"
     register: result
   - set_fact:
       service_status: "{{ result.stdout }}"

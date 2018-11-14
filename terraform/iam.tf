@@ -6,6 +6,7 @@
 
 resource "aws_iam_role" "kubernetes" {
   name = "kubernetes"
+
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -26,6 +27,7 @@ EOF
 resource "aws_iam_role_policy" "kubernetes" {
   name = "kubernetes"
   role = "${aws_iam_role.kubernetes.id}"
+
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -55,9 +57,8 @@ resource "aws_iam_role_policy" "kubernetes" {
 EOF
 }
 
-
-# IAM Instance Profile for Controller
-resource  "aws_iam_instance_profile" "kubernetes" {
- name = "kubernetes"
- roles = ["${aws_iam_role.kubernetes.name}"]
+# IAM Instance Profile for Controller and Worker
+resource "aws_iam_instance_profile" "kubernetes" {
+  name = "kubernetes"
+  role = "${aws_iam_role.kubernetes.name}"
 }

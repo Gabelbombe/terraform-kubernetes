@@ -8,18 +8,12 @@
     "${controller0_ip}",
     "${controller1_ip}",
     "${controller2_ip}",
-    "${etcd0_ip}",
-    "${etcd1_ip}",
-    "${etcd2_ip}",
     "${worker0_ip}",
     "${worker1_ip}",
     "${worker2_ip}",
     "${controller0_dns}",
     "${controller1_dns}",
     "${controller2_dns}",
-    "${etcd0_dns}",
-    "${etcd1_dns}",
-    "${etcd2_dns}",
     "${worker0_dns}",
     "${worker1_dns}",
     "${worker2_dns}",
@@ -32,10 +26,11 @@
   },
   "names": [
     {
-      "C": "UK",
-      "L": "London",
-      "O": "OpenCredo",
-      "OU": "Cluster"
+      "C": "US",
+      "L": "Seattle",
+      "O": "GE-Healthcare",
+      "OU": "CA",
+      "ST": "Washington"
     }
   ]
 }

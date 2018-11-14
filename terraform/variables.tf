@@ -71,10 +71,6 @@ variable default_instance_user {
   default = "ubuntu"
 }
 
-variable etcd_instance_type {
-  default = "t2.small"
-}
-
 variable controller_instance_type {
   default = "t2.small"
 }

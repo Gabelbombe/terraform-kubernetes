@@ -1,7 +1,9 @@
 ---
 
 - name: Create etcd config dir
-  file: path=/etc/etcd state=directory
+  file:
+    path: /etc/etcd
+    state: directory
   become: true
 
 - name: Copy certificates
@@ -46,7 +48,9 @@
   become: true
 
 - name: Create etcd data dir
-  file: path=/var/lib/etcd state=directory
+  file:
+    path: /var/lib/etcd
+    state: directory
   become: true
 
 - name: Add etcd systemd unit

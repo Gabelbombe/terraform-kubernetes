@@ -13,6 +13,7 @@ once in the 2wks what ya'll actually do..._
     - role based deployments will need to have their fact interpretted for them (facts aren't collect appropriaterly withjpout tying in the a was sdk)
     - Makefile will need to be reintroduced....
     - there's something else but seriously.... i slept im 20hrs... #trollcommit
+- Oh yeah , their on bleed edge because their running EKS over AWS... wtlf
 
 
 ### In Proc

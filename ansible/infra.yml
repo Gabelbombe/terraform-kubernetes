@@ -28,6 +28,10 @@
   roles:
     - common
     - etcd
+
+## Are we testing things and immediately forgetting that we commented them out?
+## I think so... stop doing that....
+## TODO: SET MARKER: {{ TEMP_CHANGE }}
 #     - controller
 #
 # - hosts: worker

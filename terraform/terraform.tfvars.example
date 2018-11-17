@@ -8,8 +8,8 @@ default_keypair_public_key = "CONTENTS OF YOUR PUBLIC KEY HERE"
 control_cidr = "CIDR OF MACHINE RUNNING TERRAFORM HERE"
 
 /* Optional. Set as desired */
-/* region = "us-west-2" */
-/* zone = "us-west-2a" */
+/* region = "us-east-1" */
+/* zone = "us-east-1a" */
 
 /*
    If your chosen region above doesn't have a corresponding ami
@@ -17,4 +17,4 @@ control_cidr = "CIDR OF MACHINE RUNNING TERRAFORM HERE"
    override the default below.
 */
 
-/* amis = { us-west-2 = "ami-123456" } */
+/* amis = { us-east-1 = "ami-123456" } */
